@@ -71,4 +71,60 @@ export class UserBusiness {
       refreshToken,
     };
   }
+
+  public async signupAdm(
+    name: string,
+    nickname: string,
+    email: string,
+    password: string,
+    role: string,
+    device: string
+  ) {
+    if (!name || !nickname || !email || !password || !role || !device) {
+      throw new InvalidParameterError("Missing input");
+    }
+
+    if (email.indexOf("@") === -1) {
+      throw new InvalidParameterError("Invalid Email");
+    }
+
+    if (password.length < 10) {
+      throw new InvalidParameterError("Invalid password");
+    }
+
+    const id = this.idGenerator.generate();
+
+    const hashPassword = await this.hashGenerator.createHash(password);
+
+    await this.userDatabase.createUser(
+      new User(
+        id,
+        name,
+        nickname,
+        email,
+        hashPassword,
+        stringToUserRole(role),
+        1
+      )
+    );
+
+    const accessToken = this.tokenGenerator.generateToken(
+      { id, role },
+      process.env.ACCESS_TOKEN_EXPIRES_IN
+    );
+
+    const refreshToken = this.tokenGenerator.generateToken(
+      { id, device },
+      process.env.REFRESH_TOKEN_EXPIRES_IN
+    );
+
+    await this.refreshTokenDatabase.storeRefreshToken(
+      new RefreshToken(refreshToken, device, 1, id)
+    );
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
 }

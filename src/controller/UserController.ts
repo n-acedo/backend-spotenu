@@ -6,6 +6,7 @@ import { TokenGenerator } from "../services/TokenGenerator";
 import { IdGenerator } from "../services/IdGenerator";
 import { RefreshTokenDatabase } from "../data/RefreshTokenDatabase";
 import { SignupInputDTO } from "../dto/UserDTO";
+import { UnauthorizedError } from "../errors/NotFoundError";
 
 
 export class UserController {
@@ -29,6 +30,41 @@ export class UserController {
       };
 
       const result = await UserController.UserBusiness.signupListener(
+        userData.name,
+        userData.nickname,
+        userData.email,
+        userData.password,
+        userData.role,
+        userData.device
+      );
+      res.status(200).send(result);
+    } catch (err) {
+      res.status(err.errorCode || 400).send({ message: err.message });
+    }
+  }
+
+  async signupAdm(req: Request, res: Response) {
+    try {
+      const userData: SignupInputDTO = {
+        name: req.body.name,
+        nickname: req.body.nickname,
+        email: req.body.email,
+        password: req.body.password,
+        role: req.body.role,
+        device: req.body.device,
+      };
+
+      const token = req.headers.token as string;
+
+      const authenticationData = new TokenGenerator().getData(token);
+
+      if (authenticationData.role !== "ADMIN") {
+        throw new UnauthorizedError(
+          "You must be an administrator to register another administrator"
+        );
+      }
+
+      const result = await UserController.UserBusiness.signupAdm(
         userData.name,
         userData.nickname,
         userData.email,
