@@ -2,7 +2,7 @@ export class RefreshToken {
   constructor(
     private token: string,
     private device: string,
-    private is_active: number,
+    private is_active: boolean,
     private user_id: string
   ) {}
 
@@ -14,7 +14,7 @@ export class RefreshToken {
     return this.device;
   }
 
-  public getIsActive(): number {
+  public getIsActive(): boolean {
     return this.is_active;
   }
 

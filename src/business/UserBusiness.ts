@@ -6,6 +6,7 @@ import { InvalidParameterError } from "../errors/InvalidParameterError";
 import { User, stringToUserRole } from "../model/User";
 import { RefreshTokenDatabase } from "../data/RefreshTokenDatabase";
 import { RefreshToken } from "../model/RefreshToken";
+import { NotFoundError } from "../errors/NotFoundError";
 
 export class UserBusiness {
   constructor(
@@ -63,7 +64,7 @@ export class UserBusiness {
     );
 
     await this.refreshTokenDatabase.storeRefreshToken(
-      new RefreshToken(refreshToken, device, 1, id)
+      new RefreshToken(refreshToken, device, true, id)
     );
 
     return {
@@ -119,12 +120,62 @@ export class UserBusiness {
     );
 
     await this.refreshTokenDatabase.storeRefreshToken(
-      new RefreshToken(refreshToken, device, 1, id)
+      new RefreshToken(refreshToken, device, true, id)
     );
 
     return {
       accessToken,
       refreshToken,
     };
+  }
+
+  public async login(emailOrNick: string, password: string, device: string) {
+    if (!password || !device || !emailOrNick) {
+      throw new InvalidParameterError("Missing input");
+    }
+
+    const user = await this.userDatabase.getUserByEmailOrNickName(
+      emailOrNick
+    );
+
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+
+    const verifyPassword = await this.hashGenerator.compare(
+      password,
+      user.getPassword()
+    );
+
+    if (!verifyPassword) {
+      throw new InvalidParameterError("Invalid input");
+    }
+
+    const accessToken = this.tokenGenerator.generateToken(
+      { id: user.getId(), role: user.getRole() },
+      process.env.ACCESS_TOKEN_EXPIRES_IN
+    );
+
+    const refreshToken = this.tokenGenerator.generateToken(
+      { id: user.getId(), device },
+      process.env.REFRESH_TOKEN_EXPIRES_IN
+    );
+
+    const retrievedTokenFromDatabase = await this.refreshTokenDatabase.getRefreshTokenByIdAndDevice(
+      user.getId(),
+      device
+    );
+
+    if (retrievedTokenFromDatabase) {
+      await this.refreshTokenDatabase.deleteRefreshToken(
+        retrievedTokenFromDatabase.getToken()
+      );
+    }
+
+    await this.refreshTokenDatabase.storeRefreshToken(
+      new RefreshToken(refreshToken, device, true, user.getId())
+    );
+
+    return { accessToken, refreshToken };
   }
 }

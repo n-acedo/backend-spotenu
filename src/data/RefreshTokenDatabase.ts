@@ -5,6 +5,7 @@ export class RefreshTokenDatabase extends BaseDataBase {
   protected TABLE_NAME: string = "Spotenu_RefreshToken";
 
   public async storeRefreshToken(refreshToken: RefreshToken): Promise<void> {
+    const tokenIsActive = super.convertBooleanToInt(refreshToken.getIsActive());
     await super.getConnection().raw(`
         INSERT INTO ${
           this.TABLE_NAME
@@ -12,7 +13,7 @@ export class RefreshTokenDatabase extends BaseDataBase {
         VALUES(
             "${refreshToken.getToken()}",
             "${refreshToken.getDevice()}",
-            "${refreshToken.getIsActive()}",
+            "${tokenIsActive}",
             "${refreshToken.getUserId()}"
         )
     `);
@@ -37,7 +38,7 @@ export class RefreshTokenDatabase extends BaseDataBase {
     return new RefreshToken(
       retrievedToken.token,
       retrievedToken.device,
-      retrievedToken.is_active,
+      super.convertIntToBoolean(retrievedToken.is_active),
       retrievedToken.user_id
     );
   }

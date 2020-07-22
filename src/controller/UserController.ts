@@ -5,7 +5,7 @@ import { HashGenerator } from "../services/HashGenerator";
 import { TokenGenerator } from "../services/TokenGenerator";
 import { IdGenerator } from "../services/IdGenerator";
 import { RefreshTokenDatabase } from "../data/RefreshTokenDatabase";
-import { SignupInputDTO } from "../dto/UserDTO";
+import { SignupInputDTO, LoginInputDTO } from "../dto/UserDTO";
 import { UnauthorizedError } from "../errors/NotFoundError";
 
 
@@ -72,6 +72,26 @@ export class UserController {
         userData.role,
         userData.device
       );
+      res.status(200).send(result);
+    } catch (err) {
+      res.status(err.errorCode || 400).send({ message: err.message });
+    }
+  }
+
+  async login(req: Request, res: Response) {
+    try {
+      const userData: LoginInputDTO = {
+        emailOrNick: req.body.emailOrNick,
+        password: req.body.password,
+        device: req.body.device,
+      };
+
+      const result = await UserController.UserBusiness.login(
+        userData.emailOrNick,
+        userData.password,
+        userData.device,
+      );
+
       res.status(200).send(result);
     } catch (err) {
       res.status(err.errorCode || 400).send({ message: err.message });
