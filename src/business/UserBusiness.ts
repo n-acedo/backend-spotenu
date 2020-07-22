@@ -138,7 +138,6 @@ export class UserBusiness {
     device: string,
     description: string
   ) {
-
     if (
       !name ||
       !nickname ||
@@ -149,33 +148,31 @@ export class UserBusiness {
       !description
     ) {
       throw new InvalidParameterError("Missing input");
-      }
+    }
 
-      if (email.indexOf("@") === -1) {
-        throw new InvalidParameterError("Invalid email");
-      }
+    if (email.indexOf("@") === -1) {
+      throw new InvalidParameterError("Invalid email");
+    }
 
-      if (password.length < 6) {
-        throw new InvalidParameterError("Invalid password");
-      }
-  
-      const id = this.idGenerator.generate();
-      const hashPassword = await this.hashGenerator.createHash(password);
+    if (password.length < 6) {
+      throw new InvalidParameterError("Invalid password");
+    }
 
-      await this.userDatabase.createUser(
-        new User(
-          id,
-          name,
-          nickname,
-          email,
-          hashPassword,
-          stringToUserRole(role),
-          false,
-          description
-        )
-      );
+    const id = this.idGenerator.generate();
+    const hashPassword = await this.hashGenerator.createHash(password);
 
-
+    await this.userDatabase.createUser(
+      new User(
+        id,
+        name,
+        nickname,
+        email,
+        hashPassword,
+        stringToUserRole(role),
+        false,
+        description
+      )
+    );
   }
 
   public async login(emailOrNick: string, password: string, device: string) {

@@ -43,8 +43,15 @@ export class UserDatabase extends BaseDataBase{
             WHERE email="${emailOrNick}"
             OR nickname="${emailOrNick}";
         `)
-
         return this.toModel(result[0][0])
+    }
+
+    public async getBands(): Promise <any> {
+        const result = await super.getConnection().raw(`
+            SELECT * FROM ${this.TABLE_NAME}
+            WHERE role="BAND"
+        `)
+        return result[0]
     }
     
 }
