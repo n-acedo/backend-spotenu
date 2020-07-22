@@ -21,6 +21,7 @@ export class UserDatabase extends BaseDataBase{
       }
 
     public async createUser(user: User): Promise<void> {
+        const userIsApproved = super.convertBooleanToInt(user.getIsApproved()); 
         await super.getConnection().raw(`
             INSERT INTO ${this.TABLE_NAME} (id, name, nickname, email, password, role, description, is_approved)
             VALUES(
@@ -31,7 +32,7 @@ export class UserDatabase extends BaseDataBase{
                 "${user.getPassword()}",  
                 "${user.getRole()}",  
                 "${user.getDescription()}",  
-                "${user.getIsApproved()}"  
+                "${userIsApproved}"  
             )
         `)
     }

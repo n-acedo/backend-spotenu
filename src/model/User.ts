@@ -8,8 +8,8 @@ export class User {
     private email: string,
     private password: string,
     private role: string,
-    private is_approved: number,
-    private description?: string
+    private is_approved: boolean,
+    private description?: string 
   ) {}
 
   public getId(): string {
@@ -37,7 +37,7 @@ export class User {
   }
 
 
-  public getIsApproved(): number | undefined {
+  public getIsApproved(): boolean {
     return this.is_approved;
   }
 

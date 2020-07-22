@@ -5,7 +5,7 @@ import { HashGenerator } from "../services/HashGenerator";
 import { TokenGenerator } from "../services/TokenGenerator";
 import { IdGenerator } from "../services/IdGenerator";
 import { RefreshTokenDatabase } from "../data/RefreshTokenDatabase";
-import { SignupInputDTO, LoginInputDTO } from "../dto/UserDTO";
+import { SignupInputDTO, LoginInputDTO, SignupBandInputDTO } from "../dto/UserDTO";
 import { UnauthorizedError } from "../errors/NotFoundError";
 
 
@@ -74,6 +74,34 @@ export class UserController {
       );
       res.status(200).send(result);
     } catch (err) {
+      res.status(err.errorCode || 400).send({ message: err.message });
+    }
+  }
+
+  async signupBand(req: Request, res: Response) {
+    try{
+      const userData: SignupBandInputDTO = {
+        name: req.body.name,
+        nickname: req.body.nickname,
+        email: req.body.email,
+        password: req.body.password,
+        role: req.body.role,
+        device: req.body.device,
+        description: req.body.description
+      }
+
+      await UserController.UserBusiness.signupBand(
+        userData.name,
+        userData.nickname,
+        userData.email,
+        userData.password,
+        userData.role,
+        userData.device,
+        userData.description
+      );
+
+      res.status(200).send({ message: "Band registered. Wait for approval." });
+    }catch (err) {
       res.status(err.errorCode || 400).send({ message: err.message });
     }
   }

@@ -49,7 +49,7 @@ export class UserBusiness {
         email,
         hashPassword,
         stringToUserRole(role),
-        1
+        true
       )
     );
 
@@ -105,7 +105,7 @@ export class UserBusiness {
         email,
         hashPassword,
         stringToUserRole(role),
-        1
+        true
       )
     );
 
@@ -129,14 +129,61 @@ export class UserBusiness {
     };
   }
 
+  public async signupBand(
+    name: string,
+    nickname: string,
+    email: string,
+    password: string,
+    role: string,
+    device: string,
+    description: string
+  ) {
+
+    if (
+      !name ||
+      !nickname ||
+      !email ||
+      !password ||
+      !role ||
+      !device ||
+      !description
+    ) {
+      throw new InvalidParameterError("Missing input");
+      }
+
+      if (email.indexOf("@") === -1) {
+        throw new InvalidParameterError("Invalid email");
+      }
+
+      if (password.length < 6) {
+        throw new InvalidParameterError("Invalid password");
+      }
+  
+      const id = this.idGenerator.generate();
+      const hashPassword = await this.hashGenerator.createHash(password);
+
+      await this.userDatabase.createUser(
+        new User(
+          id,
+          name,
+          nickname,
+          email,
+          hashPassword,
+          stringToUserRole(role),
+          false,
+          description
+        )
+      );
+
+
+  }
+
   public async login(emailOrNick: string, password: string, device: string) {
     if (!password || !device || !emailOrNick) {
       throw new InvalidParameterError("Missing input");
     }
 
-    const user = await this.userDatabase.getUserByEmailOrNickName(
-      emailOrNick
-    );
+    const user = await this.userDatabase.getUserByEmailOrNickName(emailOrNick);
 
     if (!user) {
       throw new NotFoundError("User not found");
