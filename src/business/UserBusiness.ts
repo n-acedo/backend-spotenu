@@ -176,6 +176,7 @@ export class UserBusiness {
   }
 
   public async login(emailOrNick: string, password: string, device: string) {
+
     if (!password || !device || !emailOrNick) {
       throw new InvalidParameterError("Missing input");
     }

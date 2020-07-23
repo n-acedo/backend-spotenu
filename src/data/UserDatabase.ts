@@ -14,7 +14,7 @@ export class UserDatabase extends BaseDataBase{
             dbModel.email,
             dbModel.password,
             dbModel.role,
-            dbModel.is_approved,
+            super.convertIntToBoolean(dbModel.is_approved),
             dbModel.description
           )
         );
@@ -52,6 +52,22 @@ export class UserDatabase extends BaseDataBase{
             WHERE role="BAND"
         `)
         return result[0]
+    }
+
+    public async getUserById(id: string): Promise<User | undefined> {
+        const result = await super.getConnection().raw(`
+            SELECT * FROM ${this.TABLE_NAME}
+            WHERE id="${id}"
+        `)
+        return this.toModel(result[0][0])
+    }
+
+    public async approveBand(id: string): Promise<void> {
+        await super.getConnection().raw(`
+            UPDATE ${this.TABLE_NAME}
+            SET is_approved = 1
+            WHERE id="${id}"; 
+        `)
     }
     
 }
