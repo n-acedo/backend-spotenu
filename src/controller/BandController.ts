@@ -56,4 +56,18 @@ export class BandController {
       res.status(err.errorCode || 400).send({ message: err.message });
     }
   }
+
+  async getGenres(req: Request, res: Response){
+    try{
+
+     const genres = await BandController.bandBusiness.getGenres(req.headers.token as string)
+
+
+     res.status(200).send({ genres });
+
+    } catch (err) {
+      res.status(err.errorCode || 400).send({ message: err.message });
+    }
+
+  }
 }

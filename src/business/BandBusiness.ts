@@ -77,4 +77,22 @@ export class BandBusiness {
 
     await this.bandDatabase.createGenre(id, genre);
   }
+
+  public async getGenres(token: string) {
+    if (!token) {
+      throw new InvalidParameterError("Missing input");
+    }
+
+    const authorization = this.tokenGenerator.getData(token);
+
+    if (authorization.role === "ADMIN" || authorization.role === "BAND") {
+      const genres = await this.bandDatabase.getGenres()
+
+      return genres
+    } else {
+      throw new UnauthorizedError(
+        "You must be an admin to access this endpoint"
+      );
+    }
+  }
 }
