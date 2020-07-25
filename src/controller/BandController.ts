@@ -1,17 +1,17 @@
 import { Request, Response } from "express";
 import { UserDatabase } from "../data/UserDatabase";
-import { HashGenerator } from "../services/HashGenerator";
 import { TokenGenerator } from "../services/TokenGenerator";
 import { IdGenerator } from "../services/IdGenerator";
-import { RefreshTokenDatabase } from "../data/RefreshTokenDatabase";
-import { UnauthorizedError } from "../errors/NotFoundError";
 import { BandBusiness } from "../business/BandBusiness";
-import { ApproveBandInputDTO } from "../dto/BandDTO";
+import { ApproveBandInputDTO, CreateGenreInputDTO } from "../dto/BandDTO";
+import { BandDatabase } from "../data/BandDatabase";
 
 export class BandController {
   private static bandBusiness = new BandBusiness(
     new UserDatabase(),
-    new TokenGenerator()
+    new TokenGenerator(),
+    new IdGenerator(),
+    new BandDatabase
   );
 
   async getBands(req: Request, res: Response) {
@@ -26,17 +26,32 @@ export class BandController {
     }
   }
 
-  async approveBand(req: Request, res: Response){
-    try{
+  async approveBand(req: Request, res: Response) {
+    try {
       const data: ApproveBandInputDTO = {
-        token: req.headers.token as string, 
-        bandId: req.params.id
+        token: req.headers.token as string,
+        bandId: req.params.id,
+      };
+
+      await BandController.bandBusiness.approveBand(data.token, data.bandId);
+
+      res.status(200).send({ message: "Band approved" });
+    } catch (err) {
+      res.status(err.errorCode || 400).send({ message: err.message });
+    }
+  }
+
+  async createGenre(req: Request, res: Response) {
+    try {
+
+      const data: CreateGenreInputDTO = {
+        token: req.headers.token as string,
+        genre: req.body.genre
       }
+      
+      await BandController.bandBusiness.createGenre(data.token, data.genre)
 
-     await BandController.bandBusiness.approveBand(data.token, data.bandId);
-
-      res.status(200).send({ message: "Band approved"});
-
+      res.status(200).send({ message: "Genre created" });
     } catch (err) {
       res.status(err.errorCode || 400).send({ message: err.message });
     }
