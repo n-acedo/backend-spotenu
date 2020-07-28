@@ -86,13 +86,29 @@ export class BandBusiness {
     const authorization = this.tokenGenerator.getData(token);
 
     if (authorization.role === "ADMIN" || authorization.role === "BAND") {
-      const genres = await this.bandDatabase.getGenres()
+      const genres = await this.bandDatabase.getGenres();
 
-      return genres
+      return genres;
     } else {
       throw new UnauthorizedError(
-        "You must be an admin to access this endpoint"
+        "You must be an admin or band to access this endpoint"
       );
     }
+  }
+
+  public async createAlbum(token: string, name: string, genres: string[]) {
+    if (!token || !name || !genres) {
+      throw new InvalidParameterError("Missing input");
+    }
+
+    const authorization = this.tokenGenerator.getData(token);
+
+    if (authorization.role !== "BAND") {
+      throw new UnauthorizedError("You must be a band to access this endpoint");
+    }
+
+    const albumId = this.idGenerator.generate()
+
+     await this.bandDatabase.createAlbum(albumId, name, authorization.id, genres)
   }
 }

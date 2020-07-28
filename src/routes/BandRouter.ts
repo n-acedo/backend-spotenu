@@ -7,3 +7,5 @@ bandRouter.put("/:id", new BandController().approveBand)
 bandRouter.post("/genre/create", new BandController().createGenre)
 bandRouter.get("/", new BandController().getBands);
 bandRouter.get("/genres", new BandController().getGenres)
+
+bandRouter.post("/album/create", new BandController().createAlbum)
