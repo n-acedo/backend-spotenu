@@ -6,7 +6,7 @@ import { InvalidParameterError } from "../errors/InvalidParameterError";
 import { User, stringToUserRole } from "../model/User";
 import { RefreshTokenDatabase } from "../data/RefreshTokenDatabase";
 import { RefreshToken } from "../model/RefreshToken";
-import { NotFoundError } from "../errors/NotFoundError";
+import { NotFoundError, UnauthorizedError } from "../errors/NotFoundError";
 
 export class UserBusiness {
   constructor(
@@ -176,6 +176,7 @@ export class UserBusiness {
   }
 
   public async login(emailOrNick: string, password: string, device: string) {
+
     if (!password || !device || !emailOrNick) {
       throw new InvalidParameterError("Missing input");
     }
@@ -184,6 +185,10 @@ export class UserBusiness {
 
     if (!user) {
       throw new NotFoundError("User not found");
+    }
+
+    if(!user.getIsApproved()) {
+      throw new UnauthorizedError("Unapproved band")
     }
 
     const verifyPassword = await this.hashGenerator.compare(
