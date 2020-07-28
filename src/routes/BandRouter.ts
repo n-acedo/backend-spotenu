@@ -9,3 +9,4 @@ bandRouter.get("/", new BandController().getBands);
 bandRouter.get("/genres", new BandController().getGenres)
 
 bandRouter.post("/album/create", new BandController().createAlbum)
+bandRouter.post("/music/create", new BandController().createMusic)

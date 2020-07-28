@@ -75,7 +75,7 @@ export class BandBusiness {
 
     const id = this.idGenerator.generate();
 
-    await this.bandDatabase.createGenre(id, genre);
+    await this.bandDatabase.createGenre(id, genre.toLowerCase());
   }
 
   public async getGenres(token: string) {
@@ -107,8 +107,47 @@ export class BandBusiness {
       throw new UnauthorizedError("You must be a band to access this endpoint");
     }
 
-    const albumId = this.idGenerator.generate()
+    const checkGenre = await this.bandDatabase.checkGenres(genres);
 
-     await this.bandDatabase.createAlbum(albumId, name, authorization.id, genres)
+    if (!checkGenre) {
+      throw new NotFoundError("Invalid genre");
+    }
+
+    const albumId = this.idGenerator.generate();
+
+    await this.bandDatabase.createAlbum(
+      albumId,
+      name,
+      authorization.id,
+      genres
+    );
+  }
+
+  public async createMusic(token: string, name: string, album: string) {
+    if (!token || !name || !album) {
+      throw new InvalidParameterError("Missing input");
+    }
+
+    const authorization = this.tokenGenerator.getData(token);
+
+    if (authorization.role !== "BAND") {
+      throw new UnauthorizedError("You must be a band to access this endpoint");
+    }
+
+    const checkMusic = await this.bandDatabase.checkMusic(name, album);
+
+    if (checkMusic) {
+      throw new GenericError("Duplicated music");
+    }
+
+    const checkAlbum = await this.bandDatabase.checkAlbum(album);
+
+    if (!checkAlbum) {
+      throw new NotFoundError("Invalid album");
+    }
+
+    const musicId = this.idGenerator.generate();
+
+    await this.bandDatabase.createMusic(musicId, name, album);
   }
 }

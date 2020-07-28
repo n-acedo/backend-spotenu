@@ -7,6 +7,7 @@ import {
   ApproveBandInputDTO,
   CreateGenreInputDTO,
   CreateAlbumInputDTO,
+  CreateMusicInputDTO,
 } from "../dto/BandDTO";
 import { BandDatabase } from "../data/BandDatabase";
 
@@ -89,6 +90,30 @@ export class BandController {
       res.status(200).send({
         message: "Album created",
       });
+    } catch (err) {
+      res.status(err.errorCode || 400).send({ message: err.message });
+    }
+  }
+
+  async createMusic(req: Request, res: Response){
+    try{
+
+      const data: CreateMusicInputDTO = {
+        token: req.headers.token as string,
+        name: req.body.name,
+        album: req.body.album
+      }
+
+      await BandController.bandBusiness.createMusic(
+        data.token,
+        data.name,
+        data.album
+      )
+
+      res.status(200).send({
+        message: "Music created",
+      });
+
     } catch (err) {
       res.status(err.errorCode || 400).send({ message: err.message });
     }

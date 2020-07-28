@@ -9,7 +9,13 @@ export interface CreateGenreInputDTO {
 }
 
 export interface CreateAlbumInputDTO {
-  token: string,
-  name: string,
-  genres: string[]
+  token: string;
+  name: string;
+  genres: string[];
+}
+
+export interface CreateMusicInputDTO {
+  token: string;
+  name: string;
+  album: string;
 }
